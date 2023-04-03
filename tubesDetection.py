@@ -19,7 +19,7 @@ import winapps
 import tensorflow as tf
 import numpy as np
 import pandas as pd
-import traceback
+import openpyxl
 
 
 class Ui_MainWindow(object):
@@ -43,10 +43,38 @@ class Ui_MainWindow(object):
         MainWindow.setFocusPolicy(QtCore.Qt.NoFocus)
         MainWindow.setAutoFillBackground(False)
         MainWindow.setStyleSheet("background-color:#323437")
+        MainWindow.setWindowIcon(QtGui.QIcon('source/icon.png'))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.uploadImage = QtWidgets.QPushButton(self.centralwidget)
         self.uploadImage.setGeometry(QtCore.QRect(1070, 700, 161, 71))
+        self.inside_conf = QtWidgets.QSlider(self.centralwidget)
+        self.inside_conf.setGeometry(QtCore.QRect(1074, 200, 140, 10))
+        self.inside_conf.setMinimum(1)
+        self.inside_conf.setMaximum(100)
+        self.inside_conf.setSingleStep(1)
+        self.inside_conf.setValue(40)
+        self.inside_conf.setOrientation(QtCore.Qt.Horizontal)
+        self.inside_conf.setObjectName("inside_conf_slider")
+        self.inside_conf.setToolTip(str(self.inside_conf.value() / 100))
+        self.outside_conf = QtWidgets.QSlider(self.centralwidget)
+        self.outside_conf.setGeometry(QtCore.QRect(1074, 250, 140, 10))
+        self.outside_conf.setMinimum(1)
+        self.outside_conf.setMaximum(100)
+        self.outside_conf.setSingleStep(1)
+        self.outside_conf.setValue(40)
+        self.outside_conf.setOrientation(QtCore.Qt.Horizontal)
+        self.outside_conf.setObjectName("outside_conf_slider")
+        self.outside_conf.setToolTip(str(self.outside_conf.value() / 100))
+        self.scale_conf = QtWidgets.QSlider(self.centralwidget)
+        self.scale_conf.setGeometry(QtCore.QRect(1074, 300, 140, 10))
+        self.scale_conf.setMinimum(1)
+        self.scale_conf.setMaximum(100)
+        self.scale_conf.setSingleStep(1)
+        self.scale_conf.setValue(80)
+        self.scale_conf.setOrientation(QtCore.Qt.Horizontal)
+        self.scale_conf.setObjectName("scale_conf_slider")
+        self.scale_conf.setToolTip(str(self.scale_conf.value() / 100))
         font = QtGui.QFont()
         font.setFamily("inherit")
         font.setPointSize(-1)
@@ -72,36 +100,52 @@ class Ui_MainWindow(object):
                                        "border: 1px solid #d1d0c5;\n"
                                        "}")
         self.uploadImage.setObjectName("uploadImage")
-        self.downloaExcel = QtWidgets.QPushButton(self.centralwidget)
-        self.downloaExcel.setGeometry(QtCore.QRect(1070, 600, 161, 71))
+        self.inside_label = QtWidgets.QLabel(self.centralwidget)
+        self.inside_label.setGeometry(QtCore.QRect(1080, 170, 140, 20))
+        self.outside_label = QtWidgets.QLabel(self.centralwidget)
+        self.outside_label.setGeometry(QtCore.QRect(1080, 220, 140, 20))
+        self.scale_label = QtWidgets.QLabel(self.centralwidget)
+        self.scale_label.setGeometry(QtCore.QRect(1080, 270, 140, 20))
+        font.setPointSize(10)
+        self.inside_label.setFont(font)
+        self.inside_label.setStyleSheet('color: white;')
+        self.inside_label.setText("Inside confidence")
+        self.outside_label.setFont(font)
+        self.outside_label.setStyleSheet('color: white;')
+        self.outside_label.setText("Outside confidence")
+        self.scale_label.setFont(font)
+        self.scale_label.setStyleSheet('color: white;')
+        self.scale_label.setText("Scale confidence")
+        self.downloadExcel = QtWidgets.QPushButton(self.centralwidget)
+        self.downloadExcel.setGeometry(QtCore.QRect(1070, 600, 161, 71))
         font = QtGui.QFont()
         font.setFamily("inherit")
         font.setPointSize(-1)
         font.setBold(False)
         font.setItalic(False)
         font.setWeight(50)
-        self.downloaExcel.setFont(font)
-        self.downloaExcel.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.downloaExcel.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.downloaExcel.setStyleSheet("QPushButton#downloaExcel {\n"
-                                        "    font: 75 8pt \"MS Shell Dlg 2\";\n"
-                                        "    background-color:#e2b714;\n"
-                                        "    border-radius: 10px;\n"
-                                        "    font:  18px;\n"
-                                        "    padding: 5px;\n"
-                                        "    font-family: inherit;\n"
-                                        "    \n"
-                                        " \n"
-                                        "}\n"
-                                        "QPushButton#downloaExcel:hover {\n"
-                                        "  background-color:#d1d0c5;\n"
-                                        "}\n"
-                                        "\n"
-                                        "QPushButton#downloaExcel:pressed {\n"
-                                        "background-color:#646669;\n"
-                                        "border: 1px solid #d1d0c5;\n"
-                                        "}")
-        self.downloaExcel.setObjectName("downloaExcel")
+        self.downloadExcel.setFont(font)
+        self.downloadExcel.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
+        self.downloadExcel.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.downloadExcel.setStyleSheet("QPushButton#downloadExcel {\n"
+                                         "    font: 75 8pt \"MS Shell Dlg 2\";\n"
+                                         "    background-color:#e2b714;\n"
+                                         "    border-radius: 10px;\n"
+                                         "    font:  18px;\n"
+                                         "    padding: 5px;\n"
+                                         "    font-family: inherit;\n"
+                                         "    \n"
+                                         " \n"
+                                         "}\n"
+                                         "QPushButton#downloadExcel:hover {\n"
+                                         "  background-color:#d1d0c5;\n"
+                                         "}\n"
+                                         "\n"
+                                         "QPushButton#downloadExcel:pressed {\n"
+                                         "background-color:#646669;\n"
+                                         "border: 1px solid #d1d0c5;\n"
+                                         "}")
+        self.downloadExcel.setObjectName("downloadExcel")
         self.stackedWidget = QtWidgets.QStackedWidget(self.centralwidget)
         self.stackedWidget.setGeometry(QtCore.QRect(30, 10, 1024, 798))
         self.stackedWidget.setMinimumSize(QtCore.QSize(256, 0))
@@ -130,30 +174,41 @@ class Ui_MainWindow(object):
         self.scalewidth = pd.DataFrame
         self.imgs = {}
         self.label = {}
-        self.downloaExcel.hide()
+        self.downloadExcel.hide()
+        self.stackedWidget.hide()
+        self.inside_conf.sliderMoved.connect(lambda: self.show_conf(self.inside_conf))
+        self.outside_conf.sliderMoved.connect(lambda: self.show_conf(self.outside_conf))
+        self.scale_conf.sliderMoved.connect(lambda: self.show_conf(self.scale_conf))
 
+    def show_conf(self, name):
+        name.setToolTip(str(name.value()/100))
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "tubes detection"))
         self.uploadImage.setText(_translate("MainWindow", "upload image"))
-        self.downloaExcel.setText(_translate("MainWindow", "download excel"))
+        self.downloadExcel.setText(_translate("MainWindow", "download excel"))
         self.uploadImageButtonClick()
-        self.downloadExcel()
+        self.downloadExcelFile()
 
     def uploadImageButtonClick(self):
         self.uploadImage.clicked.connect(self.get_image)
 
-    def downloadExcel(self):
-        self.downloaExcel.clicked.connect(self.download)
+    def downloadExcelFile(self):
+        self.downloadExcel.clicked.connect(self.download)
 
     def download(self):
-        res = filedialog.asksaveasfilename(defaultextension='.xlsx', filetypes=[('Escel','.xlsx')], initialfile='result')
+        res = filedialog.asksaveasfilename(defaultextension='.xlsx', filetypes=[('Escel', '.xlsx')],
+                                           initialfile='result')
         with pd.ExcelWriter(res) as writer:
             for i in os.listdir('outside/outside/labels'):
                 output = self.values.loc[(self.values['filename'] == i)]
                 output.to_excel(writer, sheet_name=i.split('.')[0], index=False)
 
     def add_pages(self):
+        pages = self.stackedWidget.count()
+        for i in range(pages):
+            widget = self.stackedWidget.widget(0)
+            self.stackedWidget.removeWidget(widget)
         for ind, i in enumerate(os.listdir('img')):
             self.new_page = QtWidgets.QWidget()
             self.new_page.setObjectName(i)
@@ -177,7 +232,7 @@ class Ui_MainWindow(object):
             self.next_button.setStyleSheet('color: white; \n'
                                            'border-style: none;')
             self.previos_button.setStyleSheet('color: white; \n'
-                                           'border-style: none;')
+                                              'border-style: none;')
             self.show_button.setStyleSheet('color: white; \n'
                                            'border-style: none;')
             self.hide_button.setStyleSheet('color: white; \n'
@@ -208,9 +263,10 @@ class Ui_MainWindow(object):
 
     def predobrabotka(self, input_image):
         image = cv2.imread(input_image, cv2.IMREAD_GRAYSCALE)
+        image = cv2.GaussianBlur(image, (3, 3), 0)
         image = np.asarray(image)
         image = np.expand_dims(image, axis=0)
-        image = tf.image.adjust_contrast(image, 2.)
+        image = tf.image.adjust_contrast(image, 3.)
         filename = input_image.split('/')[-1]
         cv2.imwrite(f'img/{filename}', (image.numpy()[0]))
 
@@ -275,7 +331,7 @@ class Ui_MainWindow(object):
             height = int(outside['height'][i])
             filename = str(outside['filename'][i])
             sort = pd.DataFrame()
-            if x - width/2 > 0 and y-height/2 > 0 and x + width/2 < 1023 and y + height/2 < 768:
+            if x - width / 2 > 0 and y - height / 2 > 0 and x + width / 2 < 1023 and y + height / 2 < 768:
                 sort = inside.loc[(
                         (abs(inside['x'] - x) < round(width / 2)) & (abs(inside['y'] - y) < round(width / 2)) & (
                         inside['width'] - width < 0) & (
@@ -299,7 +355,8 @@ class Ui_MainWindow(object):
             'y_inside': [],
             'width_inside': [],
             'height_inside': [],
-            'diameter': [],
+            'diameter_outside': [],
+            'diameter_inside': [],
             'wall_thickness': []
         })
         for i in range(len(scale_width)):
@@ -310,7 +367,8 @@ class Ui_MainWindow(object):
                 if filename.split('.')[0] in ind:
                     scale_num = word
                     break
-            sort['diameter'] = sort['width_outside'] / scale_len * scale_num
+            sort['diameter_outside'] = sort['width_outside'] / scale_len * scale_num
+            sort['diameter_inside'] = sort['width_inside'] / scale_len * scale_num
             sort['wall_thickness'] = (sort['width_outside'] - sort['width_inside']) / scale_len * scale_num / 2
             output = pd.concat([output, sort], ignore_index=True)
         return output
@@ -320,7 +378,7 @@ class Ui_MainWindow(object):
             'python yolov5/detect.py '
             '--weights scale.pt '
             '--img 1024 '
-            '--conf 0.8 '
+            f'--conf {self.scale_conf.value() / 100} '
             '--source img '
             '--save-crop '
             '--nosave '
@@ -331,7 +389,7 @@ class Ui_MainWindow(object):
             'python yolov5/detect.py '
             '--weights inside.pt '
             '--img 1024 '
-            '--conf 0.4 '
+            f'--conf {self.inside_conf.value() / 100} '
             '--source img '
             '--save-txt '
             '--nosave '
@@ -342,7 +400,7 @@ class Ui_MainWindow(object):
             'python yolov5/detect.py '
             '--weights outside.pt '
             '--img 1024 '
-            '--conf 0.4 '
+            f'--conf {self.outside_conf.value() / 100} '
             '--source img '
             '--save-txt '
             '--nosave '
@@ -350,14 +408,18 @@ class Ui_MainWindow(object):
             '--project ./outside'
         )
         resultDict = {}
-        for filename in os.listdir('scale/scale/crops/polosochka'):
-            scaleimage = cv2.imread(f'scale/scale/crops/polosochka/{filename}', cv2.IMREAD_GRAYSCALE)
-            thresh = 200
-            bwimage = cv2.threshold(scaleimage, thresh, 255, cv2.THRESH_BINARY)[1]
-            cv2.imwrite(f'scale/scale/crops/polosochka/{filename}', bwimage)
-            pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
-            resultDict[filename] = pytesseract.image_to_string(bwimage)
-        return resultDict
+        found_scale = os.listdir('scale/scale/crops/polosochka')
+        if found_scale:
+            for filename in os.listdir('scale/scale/crops/polosochka'):
+                scaleimage = cv2.imread(f'scale/scale/crops/polosochka/{filename}', cv2.IMREAD_GRAYSCALE)
+                thresh = 200
+                bwimage = cv2.threshold(scaleimage, thresh, 255, cv2.THRESH_BINARY)[1]
+                cv2.imwrite(f'scale/scale/crops/polosochka/{filename}', bwimage)
+                pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+                resultDict[filename] = pytesseract.image_to_string(bwimage)
+            return resultDict
+        else:
+            return False
 
     def save_results(self):
         shutil.rmtree('result', True)
@@ -375,7 +437,7 @@ class Ui_MainWindow(object):
                 p1y = int(data.iloc[i]['y_inside'] - round(data.iloc[i]['height_inside'] / 2))
                 p2x = int(data.iloc[i]['x_inside'] + round(data.iloc[i]['width_inside'] / 2))
                 p2y = int(data.iloc[i]['y_inside'] + round(data.iloc[i]['height_inside'] / 2))
-                cv2.rectangle(image, (p1x, p1y), (p2x, p2y), (0, 255, 0), 2)
+                cv2.rectangle(image, (p1x, p1y), (p2x, p2y), (242, 245, 66), 2)
             cv2.imwrite(f'result/{filename}', image)
 
     def get_image(self):
@@ -404,62 +466,69 @@ class Ui_MainWindow(object):
         for i in input_images:
             self.predobrabotka(i)
         words_in_picture = self.prediction()
-        for ind, i in words_in_picture.items():
-            words_in_picture[ind] = int(self.getnums(i))
-        for filename in os.listdir('inside/inside/labels'):
-            nothing = os.listdir('img')
-            for i in nothing:
-                if filename.split(".")[0] in i:
-                    width = i
-                    break
-            height = len(cv2.imread(f'img/{width}'))
-            width = len(cv2.imread(f'img/{width}')[0])
-            inside_file = open(f'inside/inside/labels/{filename}', 'r')
-            raw_text = inside_file.read().split('\n')
-            xList = []
-            yList = []
-            widthList = []
-            heightList = []
-            for i in raw_text:
-                bList = i.split(' ')
-                if bList != ['']:
-                    xList.append(float(bList[1]))
-                    yList.append(float(bList[2]))
-                    widthList.append(float(bList[3]))
-                    heightList.append(float(bList[4]))
-            if self.inside.empty:
-                self.inside = self.relative_to_absolute(width, height, xList, yList, widthList, filename, heightList)
-            else:
-                self.inside = pd.concat([self.inside,
-                                         self.relative_to_absolute(width, height, xList, yList, widthList, filename,
-                                                                   heightList)],
-                                        ignore_index=True)
-            outside_file = open(f'outside/outside/labels/{filename}', 'r')
-            raw_text = outside_file.read().split('\n')
-            xList = []
-            yList = []
-            widthList = []
-            heightList = []
-            for i in raw_text:
-                bList = i.split(' ')
-                if bList != ['']:
-                    xList.append(float(bList[1]))
-                    yList.append(float(bList[2]))
-                    widthList.append(float(bList[3]))
-                    heightList.append(float(bList[4]))
-            if self.outside.empty:
-                self.outside = self.relative_to_absolute(width, height, xList, yList, widthList, filename, heightList)
-            else:
-                self.outside = pd.concat(
-                    [self.outside,
-                     self.relative_to_absolute(width, height, xList, yList, widthList, filename, heightList)],
-                    ignore_index=True)
-        self.scalewidth = self.scale_len()
-        self.values = self.accordance(self.outside, self.inside)
-        self.values = self.diameter_and_wall_thickness(self.scalewidth, self.values, words_in_picture)
-        self.add_pages()
-        self.save_results()
-        self.downloaExcel.show()
+        if words_in_picture:
+            for ind, i in words_in_picture.items():
+                words_in_picture[ind] = int(self.getnums(i))
+            for filename in os.listdir('inside/inside/labels'):
+                nothing = os.listdir('img')
+                for i in nothing:
+                    if filename.split(".")[0] in i:
+                        width = i
+                        break
+                height = len(cv2.imread(f'img/{width}'))
+                width = len(cv2.imread(f'img/{width}')[0])
+                inside_file = open(f'inside/inside/labels/{filename}', 'r')
+                raw_text = inside_file.read().split('\n')
+                xList = []
+                yList = []
+                widthList = []
+                heightList = []
+                for i in raw_text:
+                    bList = i.split(' ')
+                    if bList != ['']:
+                        xList.append(float(bList[1]))
+                        yList.append(float(bList[2]))
+                        widthList.append(float(bList[3]))
+                        heightList.append(float(bList[4]))
+                if self.inside.empty:
+                    self.inside = self.relative_to_absolute(width, height, xList, yList, widthList, filename,
+                                                            heightList)
+                else:
+                    self.inside = pd.concat([self.inside,
+                                             self.relative_to_absolute(width, height, xList, yList, widthList, filename,
+                                                                       heightList)],
+                                            ignore_index=True)
+                outside_file = open(f'outside/outside/labels/{filename}', 'r')
+                raw_text = outside_file.read().split('\n')
+                xList = []
+                yList = []
+                widthList = []
+                heightList = []
+                for i in raw_text:
+                    bList = i.split(' ')
+                    if bList != ['']:
+                        xList.append(float(bList[1]))
+                        yList.append(float(bList[2]))
+                        widthList.append(float(bList[3]))
+                        heightList.append(float(bList[4]))
+                if self.outside.empty:
+                    self.outside = self.relative_to_absolute(width, height, xList, yList, widthList, filename,
+                                                             heightList)
+                else:
+                    self.outside = pd.concat(
+                        [self.outside,
+                         self.relative_to_absolute(width, height, xList, yList, widthList, filename, heightList)],
+                        ignore_index=True)
+            self.scalewidth = self.scale_len()
+            self.values = self.accordance(self.outside, self.inside)
+            self.values = self.diameter_and_wall_thickness(self.scalewidth, self.values, words_in_picture)
+            self.add_pages()
+            self.save_results()
+            self.downloadExcel.show()
+            self.stackedWidget.show()
+        else:
+            showerror("Scale not found", 'Try to reduce the conf')
+
 
 if __name__ == "__main__":
     import sys
@@ -469,8 +538,9 @@ if __name__ == "__main__":
         showerror('Error', 'Tesseract-OCR is not installed. Please visit https://github.com/UB-Mannheim/tesseract/wiki')
     if 'yolov5' not in os.listdir():
         os.system('git clone https://github.com/ultralytics/yolov5')
-    os.system('pip install openpyxl')
-    os.system('pip install -qr yolov5/requirements.txt')
+    res = os.popen('pip freeze').read()
+    if 'Pillow' not in res:
+        os.system('pip install -qr yolov5/requirements.txt')
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
