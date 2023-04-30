@@ -21,21 +21,20 @@ import pandas as pd
 import openpyxl
 import sys
 
+
 class Ui_MainWindow(object):
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1263, 830)
-        MainWindow.setMinimumSize(QtCore.QSize(395, 252))
-        MainWindow.setMaximumSize(QtCore.QSize(10000, 10000))
+        MainWindow.setMinimumSize(QtCore.QSize(1263, 830))
+        MainWindow.setMaximumSize(QtCore.QSize(1263, 830))
         font = QtGui.QFont()
-        font.setFamily("GOST type A")
-        font.setPointSize(18)
+        font.setFamily("inherit")
+        font.setPointSize(-1)
         font.setBold(False)
         font.setItalic(False)
-        font.setUnderline(False)
         font.setWeight(50)
-        font.setStrikeOut(False)
-        font.setKerning(True)
         MainWindow.setFont(font)
         MainWindow.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
         MainWindow.setMouseTracking(False)
@@ -46,33 +45,29 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.uploadImage = QtWidgets.QPushButton(self.centralwidget)
         self.uploadImage.setGeometry(QtCore.QRect(1070, 700, 161, 71))
-        self.inside_conf = QtWidgets.QSlider(self.centralwidget)
-        self.inside_conf.setGeometry(QtCore.QRect(1074, 200, 140, 10))
-        self.inside_conf.setMinimum(1)
-        self.inside_conf.setMaximum(100)
-        self.inside_conf.setSingleStep(1)
-        self.inside_conf.setValue(40)
-        self.inside_conf.setOrientation(QtCore.Qt.Horizontal)
-        self.inside_conf.setObjectName("inside_conf_slider")
-        self.inside_conf.setToolTip(str(self.inside_conf.value() / 100))
-        self.outside_conf = QtWidgets.QSlider(self.centralwidget)
-        self.outside_conf.setGeometry(QtCore.QRect(1074, 250, 140, 10))
-        self.outside_conf.setMinimum(1)
-        self.outside_conf.setMaximum(100)
-        self.outside_conf.setSingleStep(1)
-        self.outside_conf.setValue(40)
-        self.outside_conf.setOrientation(QtCore.Qt.Horizontal)
-        self.outside_conf.setObjectName("outside_conf_slider")
-        self.outside_conf.setToolTip(str(self.outside_conf.value() / 100))
-        self.scale_conf = QtWidgets.QSlider(self.centralwidget)
-        self.scale_conf.setGeometry(QtCore.QRect(1074, 300, 140, 10))
-        self.scale_conf.setMinimum(1)
-        self.scale_conf.setMaximum(100)
-        self.scale_conf.setSingleStep(1)
-        self.scale_conf.setValue(80)
-        self.scale_conf.setOrientation(QtCore.Qt.Horizontal)
-        self.scale_conf.setObjectName("scale_conf_slider")
-        self.scale_conf.setToolTip(str(self.scale_conf.value() / 100))
+        self.inside_conf = QtWidgets.QLineEdit(self.centralwidget)
+        self.inside_conf.setGeometry(QtCore.QRect(1074, 220, 140, 30))
+        self.inside_conf.setObjectName("inside_conf_line_edit")
+        validator = QtGui.QRegExpValidator(QtCore.QRegExp('^(0)(\\.|,)[0-9]{2}'))
+        self.inside_conf.setValidator(validator)
+        font.setPointSize(10)
+        self.inside_conf.setFont(font)
+        self.inside_conf.setText('0.6')
+        self.inside_conf.setStyleSheet('color: white;')
+        self.outside_conf = QtWidgets.QLineEdit(self.centralwidget)
+        self.outside_conf.setGeometry(QtCore.QRect(1074, 290, 140, 30))
+        self.outside_conf.setObjectName("inside_conf_line_edit")
+        self.outside_conf.setValidator(validator)
+        self.outside_conf.setFont(font)
+        self.outside_conf.setText('0.6')
+        self.outside_conf.setStyleSheet('color: white;')
+        self.scale_conf = QtWidgets.QLineEdit(self.centralwidget)
+        self.scale_conf.setGeometry(QtCore.QRect(1074, 360, 140, 30))
+        self.scale_conf.setObjectName("inside_conf_line_edit")
+        self.scale_conf.setValidator(validator)
+        self.scale_conf.setFont(font)
+        self.scale_conf.setText('0.8')
+        self.scale_conf.setStyleSheet('color: white;')
         font = QtGui.QFont()
         font.setFamily("inherit")
         font.setPointSize(-1)
@@ -99,11 +94,11 @@ class Ui_MainWindow(object):
                                        "}")
         self.uploadImage.setObjectName("uploadImage")
         self.inside_label = QtWidgets.QLabel(self.centralwidget)
-        self.inside_label.setGeometry(QtCore.QRect(1080, 170, 140, 20))
+        self.inside_label.setGeometry(QtCore.QRect(1080, 190, 140, 20))
         self.outside_label = QtWidgets.QLabel(self.centralwidget)
-        self.outside_label.setGeometry(QtCore.QRect(1080, 220, 140, 20))
+        self.outside_label.setGeometry(QtCore.QRect(1080, 260, 140, 20))
         self.scale_label = QtWidgets.QLabel(self.centralwidget)
-        self.scale_label.setGeometry(QtCore.QRect(1080, 270, 140, 20))
+        self.scale_label.setGeometry(QtCore.QRect(1080, 330, 140, 20))
         font.setPointSize(10)
         self.inside_label.setFont(font)
         self.inside_label.setStyleSheet('color: white;')
@@ -172,14 +167,22 @@ class Ui_MainWindow(object):
         self.scalewidth = pd.DataFrame
         self.imgs = {}
         self.label = {}
+        self.removed_items = pd.DataFrame({
+            'filename': [],
+            'x_outside': [],
+            'y_outside': [],
+            'width_outside': [],
+            'height_outside': [],
+            'x_inside': [],
+            'y_inside': [],
+            'width_inside': [],
+            'height_inside': [],
+            'diameter': [],
+            'wall_thickness': []
+        })
         self.downloadExcel.hide()
         self.stackedWidget.hide()
-        self.inside_conf.sliderMoved.connect(lambda: self.show_conf(self.inside_conf))
-        self.outside_conf.sliderMoved.connect(lambda: self.show_conf(self.outside_conf))
-        self.scale_conf.sliderMoved.connect(lambda: self.show_conf(self.scale_conf))
 
-    def show_conf(self, name):
-        name.setToolTip(str(name.value()/100))
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "tubes detection"))
@@ -202,7 +205,15 @@ class Ui_MainWindow(object):
                 output = self.values.loc[(self.values['filename'] == i)]
                 output.to_excel(writer, sheet_name=i.split('.')[0], index=False)
             self.scalewidth.to_excel(writer, sheet_name='scale width', index=False)
+            self.values.to_excel(writer, sheet_name='all', index=False)
+
     def add_pages(self):
+        class ClickableLabel(QtWidgets.QLabel):
+            clicked = QtCore.pyqtSignal()
+
+            def mousePressEvent(self, QMouseEvent):
+                self.clicked.emit()
+
         pages = self.stackedWidget.count()
         for i in range(pages):
             widget = self.stackedWidget.widget(0)
@@ -210,7 +221,7 @@ class Ui_MainWindow(object):
         for ind, i in enumerate(os.listdir('img')):
             self.new_page = QtWidgets.QWidget()
             self.new_page.setObjectName(i)
-            self.label[i] = QtWidgets.QLabel(self.new_page)
+            self.label[i] = ClickableLabel(self.new_page)
             self.label[i].setGeometry(QtCore.QRect(0, 0, 1024, 768))
             self.show_button = QtWidgets.QPushButton(self.new_page)
             self.show_button.setText('Show')
@@ -240,6 +251,35 @@ class Ui_MainWindow(object):
             self.show_button.clicked.connect(self.show_image)
             self.hide_button.clicked.connect(self.hide_image)
             self.imgs[ind] = i
+            self.label[i].clicked.connect(lambda i=i: self.actions(i))
+
+    def actions(self, i):
+        x = QtGui.QCursor.pos().x() - MainWindow.pos().x() - self.stackedWidget.geometry().x()
+        y = QtGui.QCursor.pos().y() - MainWindow.pos().y() - self.stackedWidget.geometry().y() - 40
+        a = self.values.index[((abs(self.values['x_outside'] - self.values['width_outside'] / 2) <= x) &
+                               (abs(self.values['x_outside'] + self.values['width_outside'] / 2) >= x) &
+                               (abs(self.values['y_outside'] - self.values['height_outside'] / 2) <= y) &
+                               (abs(self.values['y_outside'] + self.values['height_outside'] / 2) >= y) &
+                               (self.values['filename'] == i.split('.')[0] + '.txt')
+                               )].tolist()
+        if not a:
+            b = self.removed_items.index[
+                ((abs(self.removed_items['x_outside'] - self.removed_items['width_outside'] / 2) <= x) &
+                 (abs(self.removed_items['x_outside'] + self.removed_items['width_outside'] / 2) >= x) &
+                 (abs(self.removed_items['y_outside'] - self.removed_items['height_outside'] / 2) <= y) &
+                 (abs(self.removed_items['y_outside'] + self.removed_items['height_outside'] / 2) >= y) &
+                 (self.removed_items['filename'] == i.split('.')[0] + '.txt')
+                 )].tolist()
+            if b:
+                self.values = pd.concat([self.values, self.removed_items.loc[[b[0]]]])
+                self.removed_items = self.removed_items.drop(index=b[0])
+                self.save_results(i)
+                self.label[i].setPixmap(QtGui.QPixmap(f"result/{i}"))
+        else:
+            self.removed_items = pd.concat([self.removed_items, self.values.loc[[a[0]]]])
+            self.values = self.values.drop(index=a[0])
+            self.save_results(i)
+            self.label[i].setPixmap(QtGui.QPixmap(f"result/{i}"))
 
     def show_image(self):
         self.label[self.imgs[self.stackedWidget.currentIndex()]].setPixmap(
@@ -302,8 +342,8 @@ class Ui_MainWindow(object):
             for ind, i in enumerate(image[round(len(image) / 2)]):
                 if i == 0:
                     width.append(ind)
-            if (max(width) - min(width)+1) > len(width) / 2:
-                result.append(max(width) - min(width)+1)
+            if (max(width) - min(width) + 1) > len(width) / 2:
+                result.append(max(width) - min(width) + 1)
             else:
                 showinfo('Attention', f'Scale width may not be accurately detected in file {filename}')
                 result.append(len(image[0]))
@@ -356,8 +396,7 @@ class Ui_MainWindow(object):
             'y_inside': [],
             'width_inside': [],
             'height_inside': [],
-            'diameter_outside': [],
-            'diameter_inside': [],
+            'diameter': [],
             'wall_thickness': []
         })
         for i in range(len(scale_width)):
@@ -368,8 +407,7 @@ class Ui_MainWindow(object):
                 if filename.split('.')[0] in ind:
                     scale_num = word
                     break
-            sort['diameter_outside'] = sort['width_outside'] / scale_len * scale_num
-            sort['diameter_inside'] = sort['width_inside'] / scale_len * scale_num
+            sort['diameter'] = sort['width_outside'] / scale_len * scale_num
             sort['wall_thickness'] = (sort['width_outside'] - sort['width_inside']) / scale_len * scale_num / 2
             output = pd.concat([output, sort], ignore_index=True)
         return output
@@ -379,7 +417,7 @@ class Ui_MainWindow(object):
             'python yolov5/detect.py '
             '--weights scale.pt '
             '--img 1024 '
-            f'--conf {self.scale_conf.value() / 100} '
+            f'--conf {self.scale_conf.text()} '
             '--source img '
             '--save-crop '
             '--nosave '
@@ -390,7 +428,7 @@ class Ui_MainWindow(object):
             'python yolov5/detect.py '
             '--weights inside.pt '
             '--img 1024 '
-            f'--conf {self.inside_conf.value() / 100} '
+            f'--conf {self.inside_conf.text()} '
             '--source img '
             '--save-txt '
             '--nosave '
@@ -401,7 +439,7 @@ class Ui_MainWindow(object):
             'python yolov5/detect.py '
             '--weights outside.pt '
             '--img 1024 '
-            f'--conf {self.outside_conf.value() / 100} '
+            f'--conf {self.outside_conf.text()} '
             '--source img '
             '--save-txt '
             '--nosave '
@@ -422,12 +460,28 @@ class Ui_MainWindow(object):
         else:
             return False
 
-    def save_results(self):
-        shutil.rmtree('result', True)
-        os.mkdir('result')
-        for filename in os.listdir('img'):
-            image = cv2.imread(f'img/{filename}')
-            data = self.values.loc[(filename.split('.')[0] + '.txt' == self.values['filename'])]
+    def save_results(self, ind=''):
+        if ind == '':
+            shutil.rmtree('result', True)
+            os.mkdir('result')
+            for filename in os.listdir('img'):
+                image = cv2.imread(f'img/{filename}')
+                data = self.values.loc[(filename.split('.')[0] + '.txt' == self.values['filename'])]
+                for i in range(len(data)):
+                    p1x = int(data.iloc[i]['x_outside'] - round(data.iloc[i]['width_outside'] / 2))
+                    p1y = int(data.iloc[i]['y_outside'] - round(data.iloc[i]['height_outside'] / 2))
+                    p2x = int(data.iloc[i]['x_outside'] + round(data.iloc[i]['width_outside'] / 2))
+                    p2y = int(data.iloc[i]['y_outside'] + round(data.iloc[i]['height_outside'] / 2))
+                    cv2.rectangle(image, (p1x, p1y), (p2x, p2y), (0, 255, 0), 2)
+                    p1x = int(data.iloc[i]['x_inside'] - round(data.iloc[i]['width_inside'] / 2))
+                    p1y = int(data.iloc[i]['y_inside'] - round(data.iloc[i]['height_inside'] / 2))
+                    p2x = int(data.iloc[i]['x_inside'] + round(data.iloc[i]['width_inside'] / 2))
+                    p2y = int(data.iloc[i]['y_inside'] + round(data.iloc[i]['height_inside'] / 2))
+                    cv2.rectangle(image, (p1x, p1y), (p2x, p2y), (242, 245, 66), 2)
+                cv2.imwrite(f'result/{filename}', image)
+        else:
+            image = cv2.imread(f'img/{ind}')
+            data = self.values.loc[(ind.split('.')[0] + '.txt' == self.values['filename'])]
             for i in range(len(data)):
                 p1x = int(data.iloc[i]['x_outside'] - round(data.iloc[i]['width_outside'] / 2))
                 p1y = int(data.iloc[i]['y_outside'] - round(data.iloc[i]['height_outside'] / 2))
@@ -439,7 +493,7 @@ class Ui_MainWindow(object):
                 p2x = int(data.iloc[i]['x_inside'] + round(data.iloc[i]['width_inside'] / 2))
                 p2y = int(data.iloc[i]['y_inside'] + round(data.iloc[i]['height_inside'] / 2))
                 cv2.rectangle(image, (p1x, p1y), (p2x, p2y), (242, 245, 66), 2)
-            cv2.imwrite(f'result/{filename}', image)
+            cv2.imwrite(f'result/{ind}', image)
 
     def get_image(self):
         self.values = pd.DataFrame
@@ -532,7 +586,6 @@ class Ui_MainWindow(object):
 
 
 if __name__ == "__main__":
-
 
     teserct_is_installed = winapps.search_installed('Tesseract-OCR')
     while not teserct_is_installed:
