@@ -20,15 +20,19 @@ import numpy as np
 import pandas as pd
 import openpyxl
 import sys
+import matplotlib
+import matplotlib.pyplot as plt
+
+matplotlib.use('Qt5Agg')
 
 
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1263, 830)
-        MainWindow.setMinimumSize(QtCore.QSize(1263, 830))
-        MainWindow.setMaximumSize(QtCore.QSize(1263, 830))
+        MainWindow.resize(1460, 830)
+        MainWindow.setMinimumSize(QtCore.QSize(1460, 830))
+        MainWindow.setMaximumSize(QtCore.QSize(1460, 830))
         font = QtGui.QFont()
         font.setFamily("inherit")
         font.setPointSize(-1)
@@ -46,7 +50,7 @@ class Ui_MainWindow(object):
         self.uploadImage = QtWidgets.QPushButton(self.centralwidget)
         self.uploadImage.setGeometry(QtCore.QRect(1070, 700, 161, 71))
         self.inside_conf = QtWidgets.QLineEdit(self.centralwidget)
-        self.inside_conf.setGeometry(QtCore.QRect(1074, 220, 140, 30))
+        self.inside_conf.setGeometry(QtCore.QRect(1300, 601, 140, 30))
         self.inside_conf.setObjectName("inside_conf_line_edit")
         validator = QtGui.QRegExpValidator(QtCore.QRegExp('^(0)(\\.|,)[0-9]{2}'))
         self.inside_conf.setValidator(validator)
@@ -55,14 +59,14 @@ class Ui_MainWindow(object):
         self.inside_conf.setText('0.6')
         self.inside_conf.setStyleSheet('color: white;')
         self.outside_conf = QtWidgets.QLineEdit(self.centralwidget)
-        self.outside_conf.setGeometry(QtCore.QRect(1074, 290, 140, 30))
+        self.outside_conf.setGeometry(QtCore.QRect(1300, 671, 140, 30))
         self.outside_conf.setObjectName("inside_conf_line_edit")
         self.outside_conf.setValidator(validator)
         self.outside_conf.setFont(font)
         self.outside_conf.setText('0.6')
         self.outside_conf.setStyleSheet('color: white;')
         self.scale_conf = QtWidgets.QLineEdit(self.centralwidget)
-        self.scale_conf.setGeometry(QtCore.QRect(1074, 360, 140, 30))
+        self.scale_conf.setGeometry(QtCore.QRect(1300, 741, 140, 30))
         self.scale_conf.setObjectName("inside_conf_line_edit")
         self.scale_conf.setValidator(validator)
         self.scale_conf.setFont(font)
@@ -94,11 +98,11 @@ class Ui_MainWindow(object):
                                        "}")
         self.uploadImage.setObjectName("uploadImage")
         self.inside_label = QtWidgets.QLabel(self.centralwidget)
-        self.inside_label.setGeometry(QtCore.QRect(1080, 190, 140, 20))
+        self.inside_label.setGeometry(QtCore.QRect(1304, 571, 140, 20))
         self.outside_label = QtWidgets.QLabel(self.centralwidget)
-        self.outside_label.setGeometry(QtCore.QRect(1080, 260, 140, 20))
+        self.outside_label.setGeometry(QtCore.QRect(1304, 641, 140, 20))
         self.scale_label = QtWidgets.QLabel(self.centralwidget)
-        self.scale_label.setGeometry(QtCore.QRect(1080, 330, 140, 20))
+        self.scale_label.setGeometry(QtCore.QRect(1304, 711, 140, 20))
         font.setPointSize(10)
         self.inside_label.setFont(font)
         self.inside_label.setStyleSheet('color: white;')
@@ -139,6 +143,31 @@ class Ui_MainWindow(object):
                                          "border: 1px solid #d1d0c5;\n"
                                          "}")
         self.downloadExcel.setObjectName("downloadExcel")
+
+        self.insidePlot = QtWidgets.QLabel(self.centralwidget)
+        self.insidePlot.setScaledContents(True)
+        self.insidePlot.setGeometry(1130, 30, 250, 150)
+        self.insidePlot.setMinimumSize(QtCore.QSize(30, 0))
+        self.insidePlot.setObjectName('insideWidget')
+        self.insidePlot.setStyleSheet("QLabel#insideWidget {\n"
+                                      "display: box;\n"
+                                      "}")
+        self.outsidePlot = QtWidgets.QLabel(self.centralwidget)
+        self.outsidePlot.setScaledContents(True)
+        self.outsidePlot.setGeometry(1130, 200, 250, 150)
+        self.outsidePlot.setMinimumSize(QtCore.QSize(30, 0))
+        self.outsidePlot.setObjectName('outsideWidget')
+        self.outsidePlot.setStyleSheet("QWidget#outsideWidget {\n"
+                                       "display: box;\n"
+                                       "}")
+        self.wallPlot = QtWidgets.QLabel(self.centralwidget)
+        self.wallPlot.setScaledContents(True)
+        self.wallPlot.setGeometry(1130, 370, 250, 150)
+        self.wallPlot.setMinimumSize(QtCore.QSize(30, 0))
+        self.wallPlot.setObjectName('wallWidget')
+        self.wallPlot.setStyleSheet("QWidget#wallWidget {\n"
+                                    "display: box;\n"
+                                    "}")
         self.stackedWidget = QtWidgets.QStackedWidget(self.centralwidget)
         self.stackedWidget.setGeometry(QtCore.QRect(30, 10, 1024, 798))
         self.stackedWidget.setMinimumSize(QtCore.QSize(256, 0))
@@ -177,11 +206,40 @@ class Ui_MainWindow(object):
             'y_inside': [],
             'width_inside': [],
             'height_inside': [],
-            'diameter': [],
-            'wall_thickness': []
+            'diameter_outside': [],
+            'diameter_inside': [],
+            'wall_thickness': [],
         })
         self.downloadExcel.hide()
         self.stackedWidget.hide()
+        self.plot_inside = {}
+        self.plot_outside = {}
+        self.plot_wall = {}
+
+    def add_plots(self, filename):
+        try:
+            only_for_filename = self.values.loc[(self.values['filename'] == filename.split('.')[0] + '.txt')]
+            plt.hist(only_for_filename['diameter_inside'], color='blue', edgecolor='black',
+                     bins=int((only_for_filename['diameter_inside'].max() - only_for_filename['diameter_inside'].min())))
+            plt.xlabel('inside diameter', fontsize=16)
+            plt.savefig(f'plots/inside_{filename}')
+            plt.clf()
+            plt.hist(only_for_filename['diameter_outside'], color='blue', edgecolor='black',
+                     bins=int((only_for_filename['diameter_outside'].max() - only_for_filename['diameter_outside'].min())/2))
+            plt.xlabel('outside diameter', fontsize=16)
+            plt.savefig(f'plots/outside_{filename}')
+            plt.clf()
+            plt.hist(only_for_filename['wall_thickness'], color='blue', edgecolor='black',
+                     bins=int((only_for_filename['wall_thickness'].max() - only_for_filename['wall_thickness'].min())))
+            plt.xlabel('wall thickness', fontsize=16)
+            plt.savefig(f'plots/wall_{filename}')
+            plt.clf()
+            self.plot_inside[filename] = QtGui.QPixmap(f"plots/inside_{filename}")
+            self.plot_outside[filename] = QtGui.QPixmap(f"plots/outside_{filename}")
+            self.plot_wall[filename] = QtGui.QPixmap(f"plots/wall_{filename}")
+
+        except Exception as E:
+            print(E)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -252,6 +310,7 @@ class Ui_MainWindow(object):
             self.hide_button.clicked.connect(self.hide_image)
             self.imgs[ind] = i
             self.label[i].clicked.connect(lambda i=i: self.actions(i))
+            self.add_plots(i)
 
     def actions(self, i):
         x = QtGui.QCursor.pos().x() - MainWindow.pos().x() - self.stackedWidget.geometry().x()
@@ -273,11 +332,19 @@ class Ui_MainWindow(object):
             if b:
                 self.values = pd.concat([self.values, self.removed_items.loc[[b[0]]]])
                 self.removed_items = self.removed_items.drop(index=b[0])
+                self.add_plots(i)
+                self.insidePlot.setPixmap(self.plot_inside[i])
+                self.outsidePlot.setPixmap(self.plot_outside[i])
+                self.wallPlot.setPixmap(self.plot_wall[i])
                 self.save_results(i)
                 self.label[i].setPixmap(QtGui.QPixmap(f"result/{i}"))
         else:
             self.removed_items = pd.concat([self.removed_items, self.values.loc[[a[0]]]])
             self.values = self.values.drop(index=a[0])
+            self.add_plots(i)
+            self.insidePlot.setPixmap(self.plot_inside[i])
+            self.outsidePlot.setPixmap(self.plot_outside[i])
+            self.wallPlot.setPixmap(self.plot_wall[i])
             self.save_results(i)
             self.label[i].setPixmap(QtGui.QPixmap(f"result/{i}"))
 
@@ -291,9 +358,15 @@ class Ui_MainWindow(object):
 
     def next_page(self):
         self.stackedWidget.setCurrentIndex(self.stackedWidget.currentIndex() + 1)
+        self.insidePlot.setPixmap(self.plot_inside[os.listdir('img')[self.stackedWidget.currentIndex()]])
+        self.outsidePlot.setPixmap(self.plot_outside[os.listdir('img')[self.stackedWidget.currentIndex()]])
+        self.wallPlot.setPixmap(self.plot_wall[os.listdir('img')[self.stackedWidget.currentIndex()]])
 
     def previous_page(self):
         self.stackedWidget.setCurrentIndex(self.stackedWidget.currentIndex() - 1)
+        self.insidePlot.setPixmap(self.plot_inside[os.listdir('img')[self.stackedWidget.currentIndex()]])
+        self.outsidePlot.setPixmap(self.plot_outside[os.listdir('img')[self.stackedWidget.currentIndex()]])
+        self.wallPlot.setPixmap(self.plot_wall[os.listdir('img')[self.stackedWidget.currentIndex()]])
 
     def check_laters(self, filepath):
         laters = set('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')
@@ -396,8 +469,9 @@ class Ui_MainWindow(object):
             'y_inside': [],
             'width_inside': [],
             'height_inside': [],
-            'diameter': [],
-            'wall_thickness': []
+            'diameter_outside': [],
+            'diameter_inside': [],
+            'wall_thickness': [],
         })
         for i in range(len(scale_width)):
             scale_len = int(scale_width.iloc[i]['scale_width'])
@@ -407,7 +481,8 @@ class Ui_MainWindow(object):
                 if filename.split('.')[0] in ind:
                     scale_num = word
                     break
-            sort['diameter'] = sort['width_outside'] / scale_len * scale_num
+            sort['diameter_outside'] = sort['width_outside'] / scale_len * scale_num
+            sort['diameter_inside'] = sort['width_inside'] / scale_len * scale_num
             sort['wall_thickness'] = (sort['width_outside'] - sort['width_inside']) / scale_len * scale_num / 2
             output = pd.concat([output, sort], ignore_index=True)
         return output
@@ -460,7 +535,7 @@ class Ui_MainWindow(object):
         else:
             return False
 
-    def save_results(self, ind=''):
+    def save_results(self, ind):
         if ind == '':
             shutil.rmtree('result', True)
             os.mkdir('result')
@@ -513,6 +588,10 @@ class Ui_MainWindow(object):
             return None
         if 'img' not in os.listdir():
             os.mkdir('img')
+        if 'plots' in os.listdir():
+            shutil.rmtree('plots', True)
+        os.mkdir('plots')
+
         for i in input_images:
             if self.check_laters(i):
                 showerror('Error', 'There are invalid letters in the file path')
@@ -578,7 +657,10 @@ class Ui_MainWindow(object):
             self.values = self.accordance(self.outside, self.inside)
             self.values = self.diameter_and_wall_thickness(self.scalewidth, self.values, words_in_picture)
             self.add_pages()
-            self.save_results()
+            self.insidePlot.setPixmap(self.plot_inside[os.listdir('img')[0]])
+            self.outsidePlot.setPixmap(self.plot_outside[os.listdir('img')[0]])
+            self.wallPlot.setPixmap(self.plot_wall[os.listdir('img')[0]])
+            self.save_results('')
             self.downloadExcel.show()
             self.stackedWidget.show()
         else:
