@@ -248,17 +248,17 @@ class Ui_MainWindow(object):
             only_for_filename = self.values.loc[(self.values['filename'] == filename.split('.')[0] + '.txt')]
             plt.hist(only_for_filename['diameter_inside'], color='blue', edgecolor='black',
                      bins=int((only_for_filename['diameter_inside'].max() - only_for_filename['diameter_inside'].min())/2))
-            plt.xlabel('inside diameter', fontsize=16)
+            plt.xlabel('inside diameter', fontsize=18)
             plt.savefig(f'plots/inside_{filename}')
             plt.clf()
             plt.hist(only_for_filename['diameter_outside'], color='blue', edgecolor='black',
                      bins=int((only_for_filename['diameter_outside'].max() - only_for_filename['diameter_outside'].min())/2))
-            plt.xlabel('outside diameter', fontsize=16)
+            plt.xlabel('outside diameter', fontsize=18)
             plt.savefig(f'plots/outside_{filename}')
             plt.clf()
             plt.hist(only_for_filename['wall_thickness'], color='blue', edgecolor='black',
                      bins=int((only_for_filename['wall_thickness'].max() - only_for_filename['wall_thickness'].min())/2))
-            plt.xlabel('wall thickness', fontsize=16)
+            plt.xlabel('wall thickness', fontsize=18)
             plt.savefig(f'plots/wall_{filename}')
             plt.clf()
             self.plot_inside[filename] = QtGui.QPixmap(f"plots/inside_{filename}")
@@ -273,17 +273,21 @@ class Ui_MainWindow(object):
         plt.subplot(2, 2, 1)
         plt.hist(self.values['diameter_inside'], color='blue', edgecolor='black',
                      bins=int((self.values['diameter_inside'].max() - self.values['diameter_inside'].min())/2))
+        plt.xlabel('diameter, nm')
         plt.title('inside diameter', fontsize=18)
+        plt.subplots_adjust(hspace=0.4)
 
         plt.subplot(2, 2, 2)
         plt.hist(self.values['diameter_outside'], color='blue', edgecolor='black',
                  bins=int((self.values['diameter_outside'].max() - self.values['diameter_outside'].min())/2))
+        plt.xlabel('diameter, nm')
         plt.title('outside diameter', fontsize=18)
 
         plt.subplot(2, 2, 3)
         plt.hist(self.values['wall_thickness'], color='blue', edgecolor='black',
                  bins=int((self.values['wall_thickness'].max() - self.values['wall_thickness'].min())/2))
         plt.title('wall thickness', fontsize=18)
+        plt.xlabel('thickness, nm')
         plt.show()
 
 
@@ -296,7 +300,7 @@ class Ui_MainWindow(object):
         self.downloadExcel.setText(_translate("MainWindow", "download excel"))
         self.uploadImageButtonClick()
         self.downloadExcelFile()
-        plt.rcParams['figure.figsize'] = [12, 7]
+        plt.rcParams['figure.figsize'] = [12, 9]
         self.PlotButtonClick()
 
 
